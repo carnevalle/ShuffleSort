@@ -118,11 +118,7 @@
 
         getClonedOffset: function(el){
             return {"left": el.offset().left - parseFloat(el.css("marginLeft")), "top": el.offset().top - parseFloat(el.css("marginTop"))};
-        },
-
-        myPublicFunction: function() {
-            console.log("Calling my public function");
-        },
+        }
     };
 
     // Attach the plugin to the jQuery namespace, no need to modify this
