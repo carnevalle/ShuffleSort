@@ -13,6 +13,7 @@
 
             #list{
                 width: 400px;
+                position: relative;
             }
 
             #list div{
@@ -20,7 +21,9 @@
                 border: 1px solid black;
                 margin-bottom: 5px;
                 background-color: #eee;
-                
+                float: left;
+                width: 50px;
+                margin: 10px 5px 20px 2px;
                 /*
                 -webkit-transition: -webkit-transform .3s ease-out; 
                 -moz-transition: -moz-transform .3s ease-out; 
@@ -44,7 +47,11 @@
 
         $(function() {
             var plugin = $("#list").shufflesort();
-            plugin.shufflesort("reorder", "data-priority");
+            //plugin.shufflesort("reorder", "data-priority");
+
+            $("#reorder").click(function(){
+                plugin.shufflesort("reorder", "data-priority");
+            });
         })
         </script>
     </head>
@@ -56,5 +63,7 @@
             <div data-value="2" data-priority="5">Anden</div>
             <div data-value="4" data-priority="2">Fjerde</div>
         </div>
+
+        <button id="reorder">Reorder</button>
     </body>
 </html>

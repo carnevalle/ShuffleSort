@@ -54,13 +54,16 @@
         animate: function(base, sorted){
             for (var i = 0, len = sorted.length; i < len; i++) {
                 if(sorted[i] !== base[i]){
-                    this.animateTo($(sorted[i]), $(base[i]).offset());
+                    //this.animateTo($(sorted[i]), $(base[i]).offset());
+                    this.animateTo($(sorted[i]), this.getClonedOffset($(base[i])));
                 }
-            }            
+            }
+            this.items = sorted;          
         },
 
         animateTo: function(item, destination){
 
+            var itemOffset = this.getClonedOffset(item);
             var style = this.getElementStyle(item);
             var clone = item.clone();
             clone.css(style);
@@ -69,8 +72,8 @@
 
             clone
             .css('position', 'absolute')
-            .css('left', item.offset().left)
-            .css('top', item.offset().top);
+            .css('left', itemOffset.left)
+            .css('top', itemOffset.top);
             $("body").append(clone);
 
             clone.animate({
@@ -79,9 +82,9 @@
             }, 2000, function() {
                 item
                 .css("opacity",1);
-                item.offset(destination);
+                item.offset( {top: destination.top+parseFloat(item.css("marginTop")), left: destination.left+parseFloat(item.css("marginLeft"))});
 
-                //clone.remove();
+                clone.remove();
             });
         },
 
@@ -113,7 +116,7 @@
         },
 
         getClonedOffset: function(el){
-            return {"left": el.offset().left, "top": el.offset().top};
+            return {"left": el.offset().left - parseFloat(el.css("marginLeft")), "top": el.offset().top - parseFloat(el.css("marginTop"))};
         },
 
         myPublicFunction: function() {
