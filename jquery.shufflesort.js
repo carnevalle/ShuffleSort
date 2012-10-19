@@ -3,7 +3,7 @@
     // Plugin defaults, these will be shared among all plugin instances
     var pluginName = 'shufflesort',
     defaults = {
-        propertyName: "value"
+        sortorder: "ASC"
     };
 
     // Plugin constructor, no need to modify this, use the init() method below
@@ -30,6 +30,7 @@
 
         reorder: function(property){
 
+            var sortorder = this.options.sortorder;
             var sorteditems = this.$el.children();
             // sort based on timestamp attribute
             sorteditems.sort(function(a, b) {
@@ -40,9 +41,9 @@
 
              // compare
              if (a > b) {
-              return 1;
+              return (sortorder === "ASC")? 1 : -1;
              } else if (a < b) {
-              return -1;
+              return (sortorder === "ASC")? -1 : 1;
              } else {
               return 0;
              }
