@@ -23,6 +23,8 @@
 
         init: function() {
             this.items = this.$el.children();
+            this.isAnimating = false;
+
             this.api = {
                 'reorder': this.reorder
             };
@@ -40,9 +42,9 @@
              b = $(b).attr(property);
 
              // compare
-             if (a > b) {
+             if (parseInt(a) > parseInt(b)) {
               return (sortorder === "ASC")? 1 : -1;
-             } else if (a < b) {
+             } else if (parseInt(a) < parseInt(b)) {
               return (sortorder === "ASC")? -1 : 1;
              } else {
               return 0;
@@ -53,71 +55,98 @@
         },
 
         animate: function(base, sorted){
+
+            if(this.isAnimating){
+                this.clearanimation();
+            }
+
+
             for (var i = 0, len = sorted.length; i < len; i++) {
+
                 if(sorted[i] !== base[i]){
                     //this.animateTo($(sorted[i]), $(base[i]).offset());
-                    this.animateTo($(sorted[i]), this.getClonedOffset($(base[i])));
+
+                    var item = $(sorted[i]);
+
+                    var curPosition = this.getClonedOffset($(base[i]));
+                    var newPosition = this.getClonedOffset($(sorted[i]));
+                    var deltaPosition = {
+                        left: 0,
+                        top: 0
+                    }
+
+                    if(curPosition.left < newPosition.left){
+                        deltaPosition.left = curPosition.left - newPosition.left
+                    }else{
+                        deltaPosition.left = curPosition.left - newPosition.left
+                    }
+
+                    if(curPosition.top < newPosition.top){
+                        deltaPosition.top =  curPosition.top - newPosition.top
+                    }else{
+                        deltaPosition.top =  curPosition.top - newPosition.top
+                    }                    
+
+                    this.animateTo($(sorted[i]), deltaPosition, $(base[i]));
+                    this.isAnimating = true;
                 }
             }
-            this.items = sorted;          
+            this.items = sorted;
+
+            var self = this;
+            this.timer = setTimeout(function(){
+                console.log("trying to reorder");
+                self.reposition();
+            },1100);
         },
 
-        animateTo: function(item, destination){
+        clearanimation: function(){
+            if(typeof this.timer != "undefined"){
+                clearTimeout(this.timer);
+            }
 
+            for (var i = 0, len = this.items.length; i < len; i++) {
+
+                var item = $(this.items[i]);
+
+                if( item.is(':animated') ){
+                    item.stop(true, true);
+                }
+            }
+
+            this.reposition();
+        },
+
+        reposition: function(){
+            for (var i = 0, len = this.items.length; i < len; i++) {
+                var item = $(this.items[i]);
+                this.$el.append(item);
+                
+                item.css({
+                    'top': 'auto',
+                    'left': 'auto'
+                })
+            }            
+        },
+
+        animateTo: function(item, destination, order){
             var itemOffset = this.getClonedOffset(item);
-            var style = this.getElementStyle(item);
-            var clone = item.clone();
-            clone.css(style);
-            
-            item.css("opacity",0);
 
-            clone
-            .css('position', 'absolute')
-            .css('left', itemOffset.left)
-            .css('top', itemOffset.top);
-            $("body").append(clone);
+            item
+            .css("position", "relative");     
 
-            clone.animate({
+            var self = this;
+            item.animate({
                 left: destination.left,
-                top: destination.top,
-            }, 2000, function() {
-                item
-                .css("opacity",1);
-                item.offset( {top: destination.top+parseFloat(item.css("marginTop")), left: destination.left+parseFloat(item.css("marginLeft"))});
-
-                clone.remove();
+                top: destination.top
+            }, 1000, function() {
+                
             });
         },
 
-        getElementStyle: function(el){
-            var dom = el.get(0);
-            var style;
-            var returns = {};
-            if(window.getComputedStyle){
-                var camelize = function(a,b){
-                    return b.toUpperCase();
-                }
-                style = window.getComputedStyle(dom, null);
-                for(var i=0;i<style.length;i++){
-                    var prop = style[i];
-                    var camel = prop.replace(/\-([a-z])/g, camelize);
-                    var val = style.getPropertyValue(prop);
-                    returns[camel] = val;
-                }
-                return returns;
-            }
-            if(dom.currentStyle){
-                style = dom.currentStyle;
-                for(var prop in style){
-                    returns[prop] = style[prop];
-                }
-                return returns;
-            }
-            return el.css();            
-        },
-
         getClonedOffset: function(el){
-            return {"left": el.offset().left - parseFloat(el.css("marginLeft")), "top": el.offset().top - parseFloat(el.css("marginTop"))};
+            //return {"left": el.offset().left - parseFloat(el.css("marginLeft")), "top": el.offset().top - parseFloat(el.css("marginTop"))};
+            return {"left": el.position().left, "top": el.position().top};
         }
     };
 
